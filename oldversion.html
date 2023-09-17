@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Position Calculate</title>
+		
+		<style>
+			table{
+				border-collapse: collapse;
+				border-spacing: 0;
+			}
+			th, td{
+				padding: 3px 3px;
+				border: 1px solid #000;
+			}
+			input{
+				width: 150px; 
+			}
+		</style>
+
+
+	</head>
+
+	<body id='body'>
+		<script>
+			window.onload = init;
+
+			var lecarstvaDano = [];
+			var lecarstvaResult = [];
+			var stavka_nds = 10;
+			var snizhenie = 0;
+			var cena_Kontrakta = 0;
+
+			function init(){
+				var calculateButton = document.getElementById("buttonCalculate");
+
+				calculateButton.onclick = function(){
+				
+					/*
+					var medicineVal = [
+						document.getElementById("name").value, 
+						document.getElementById("kolichestvo").value,
+						document.getElementById("edVupak").value,
+						document.getElementById("priceNmck").value,
+						document.getElementById("summaNmck").value,
+						document.getElementById("snizhenie").value,
+						document.getElementById("pricePosition").value];
+					*/
+
+					//каждый раз при нажатии на кнопку расчитать обнуляем массивы и заполняем их снова и расчитываем заново
+					lecarstvaDano = [];
+					lecarstvaResult = [];
+
+					
+					let table_input = document.getElementById("inputTable");
+
+					let colRows = table_input.rows.length;
+
+					stavka_nds = parseFloat((document.getElementById("nds").value).replace(",","."));
+					snizhenie = parseFloat((document.getElementById("snizhenie_input")).value.replace(",","."));
+					cena_Kontrakta = parseFloat((document.getElementById("price").value).replace(",","."));
+
+					let ostatocSummy = cena_Kontrakta;
+
+
+					console.log("Table Rows = " + colRows);
+
+					//заполняем массив данных
+
+					for(let i = 1; i < colRows; i++){
+						
+						row = table_input.rows[i];
+						
+						var medicineVal = new positionObj(
+							row.children[0].children[0].value,
+							row.children[1].children[0].value.replace(",","."),
+							row.children[2].children[0].value.replace(",","."),
+							row.children[3].children[0].value.replace(",","."), 
+							0
+							);
+
+						//var medicineVal = new positionObj(
+						//document.getElementById("name").value, "edIzmer", 
+						//document.getElementById("kolichestvo").value,
+						//document.getElementById("priceNmck").value,
+						//document.getElementById("summaNmck").value,
+						//document.getElementById("edVupak").value,
+						//document.getElementById("snizhenie").value,
+						//document.getElementById("pricePosition").value);
+
+						if (i < colRows-1){
+							medicineVal.pricePosition = (medicineVal.kolichestvo * medicineVal.priceZaEd).toFixed(6);
+							ostatocSummy = ostatocSummy - medicineVal.pricePosition;
+						} else {
+							medicineVal.pricePosition = ostatocSummy;
+						}
+
+						lecarstvaDano.push(medicineVal);
+						console.log(lecarstvaDano);
+						console.log(medicineVal);
+						console.log("click button вычислить");
+					
+					}
+
+					for (let i = 0; i<colRows-1; i++){
+						CalculateOne(lecarstvaDano[i]);
+
+					}
+				
+					//console.log(CalculateTest(medicineVal));
+					
+					//считаем результат
+
+					/*
+					for (let i = 0; i<colRows-1; i++){
+						Calculate(lecarstvaDano[i]);
+
+					}
+					*/
+
+					console.log(lecarstvaResult);
+					//showResult();
+					showResultSpecTable();
+				}
+
+				var rowsButton = document.getElementById("CreateRowsButton");
+
+				rowsButton.onclick = function(){
+					//let colRows = parseInt(document.getElementById("colRowsInputTable").value);
+					//console.log("rows input = " + colRows);
+					let colRows = 1;
+
+					let table_input = document.getElementById("inputTable");
+
+					for(let i = 0; i < colRows; i++){
+						let row = document.createElement("tr");
+						let data1 = document.createElement("td");
+						data1.innerHTML = "<textarea></textarea>";
+						row.appendChild(data1);
+
+						let data2 = document.createElement("td");
+						data2.innerHTML = "<input type='text'>";
+						row.appendChild(data2);
+
+						let data3 = document.createElement("td");
+						data3.innerHTML = "<input type='text'>";
+						row.appendChild(data3);
+
+						let data4 = document.createElement("td");
+						data4.innerHTML = "<input type='text'>" ;
+						row.appendChild(data4);
+
+						/*
+						let data5 = document.createElement("td");
+						data5.innerHTML = "<input type='text'>";
+						row.appendChild(data5);
+
+						let data6 = document.createElement("td");
+						data6.innerHTML = "<input type='text'>";
+						row.appendChild(data6);
+
+						let data7 = document.createElement("td");
+						data7.innerHTML = "<input type='text'>";
+						row.appendChild(data7);
+						*/
+
+						table_input.appendChild(row);
+
+					//this.name = name;
+					//this.edIzmer = edIzmer;
+					//this.kolichestvo = parseFloat(kolichestvo);
+					//this.edVUpakovke = parseFloat(edVUpakovke);
+					//this.priceZaEdNmck = parseFloat(priceZaEdNmck);
+					//this.summaNmck = parseFloat(summaNmck);
+					//this.pricePosition = pricePosition;
+					//this.priceZaEd = parseInt(priceZaEdNmck * (1-snizhenie/100)*100)/100;
+					//this.priceZaUpakovky = (this.edVUpakovke * this.priceZaEd).toFixed(6);
+					
+					}
+
+				}
+
+				var deleteRowsButton = document.getElementById("DeleteRowsButton");
+				deleteRowsButton.onclick = function(){
+					let table_input = document.getElementById("inputTable");
+					let colRows = table_input.rows.length;
+					if ( colRows > 1) {
+						table_input.deleteRow(colRows-1);
+					}
+
+				}
+
+				let getDatabutton = document.getElementById("getDatabutton");
+
+				getDatabutton.onclick = function(){
+
+					let table_input = document.getElementById("inputTable");
+
+					let nameField = document.getElementById("name");
+					let kolichestvoField = document.getElementById("kolichestvo");
+					let edVUpakovkeField = document.getElementById("edVUpakovke");
+					let priceZaEdNMCKField = document.getElementById("priceZaEdNMCK");
+
+					let nameFieldString = nameField.value;
+					let nameSplitMassive = nameFieldString.split('\n');
+
+					let kolichestvoFieldString = kolichestvoField.value;
+					let kolichestvoSplitMassive = kolichestvoFieldString.split('\n');
+
+					let edVUpakovkeFieldString = edVUpakovkeField.value;
+					let edVUpakovkeSplitMassive = edVUpakovkeFieldString.split('\n');
+
+
+					let priceZaEdNMCKFieldString = priceZaEdNMCKField.value;
+					let priceZaEdNMCKMassive = priceZaEdNMCKFieldString.split('\n');
+
+					for (let i = 0; i < nameSplitMassive.length; i++){
+						
+						let name = nameSplitMassive[i];
+						let kolichestvo = parseFloat(kolichestvoSplitMassive[i].replace(',', '.'));
+						let edVUpakovke = parseFloat(edVUpakovkeSplitMassive[i].replace(',', '.'));
+						let priceZaEdNMCK = parseFloat(priceZaEdNMCKMassive[i].replace(',', '.'));
+
+						let row = document.createElement("tr");
+						let data1 = document.createElement("td");
+						data1.innerHTML = "<textarea>" + name + "</textarea>";
+						row.appendChild(data1);
+
+						let data2 = document.createElement("td");
+						data2.innerHTML = "<input type='text' value='" + kolichestvo + "'>";
+						row.appendChild(data2);
+
+						let data3 = document.createElement("td");
+						data3.innerHTML = "<input type='text' value='" + edVUpakovke +"'>";
+						row.appendChild(data3);
+
+						let data4 = document.createElement("td");
+						data4.innerHTML = "<input type='text' value='" + priceZaEdNMCK + "'>" ;
+						row.appendChild(data4);
+						
+
+						table_input.appendChild(row);
+
+						console.log(name + kolichestvo + edVUpakovke + priceZaEdNMCK);
+					
+					}
+				
+				}
+
+
+			}
+
+			//конструктор объекта позиции
+			function positionObj(name, kolichestvo, edVUpakovke, priceZaEdNmck, pricePosition){
+				this.name = name;
+				this.kolichestvo = parseFloat(kolichestvo);
+				this.edVUpakovke = parseFloat(edVUpakovke);
+				this.priceZaEdNmck = parseFloat(priceZaEdNmck);
+				this.summaNmck = (this.kolichestvo * this.priceZaEdNmck).toFixed(6);
+				this.pricePosition = pricePosition;
+				this.priceZaEd = parseInt(priceZaEdNmck * (1-snizhenie/100)*100)/100;
+				this.priceZaUpakovky = (this.edVUpakovke * this.priceZaEd).toFixed(6);
+				
+			}
+
+			//конструктор объекта таблицы (пока не используется)
+
+			function table(kolichestvoPosition, priceContract){
+				this.kolichestvoPosition = kolichestvoPosition;
+				this.priceContract = priceContract;
+			}
+
+
+			/*
+			function CalculateOneTest(medicineVal){
+				
+				var priceContractTest = medicineVal[6];
+				var kolichestvoTest = medicineVal[1];
+				var edVUpakovkeTest = medicineVal[2];
+				var priceZaEdTestNmck = medicineVal[3];
+				var summaNmckTest = medicineVal[4];
+				var snizhenieTest = medicineVal[5];
+
+				var kolUpacTest = kolichestvoTest/edVUpakovkeTest;
+
+				var priceZaEdTest = parseInt(priceZaEdTestNmck * (1-snizhenieTest/100)*100)/100;
+
+						//priceZaEdTest = 3.13;
+
+				var cenaOstatok = priceContractTest;
+
+				var result = [];
+
+				console.log(priceZaEdTest);
+				console.log(kolUpacTest);
+
+				for(let i=0; i<=kolUpacTest; i++){
+					cenaOstatok = priceContractTest - (i*edVUpakovkeTest*priceZaEdTest);
+				
+					console.log((cenaOstatok*100)%(kolUpacTest-i));
+				
+					if (((cenaOstatok.toFixed(6)*100)%((kolUpacTest-i)))==0){
+						console.log(i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeakovkeTest);
+						console.log((kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2));
+					
+						console.log("Проверка на остаток цену за единицу " + parseFloat((cenaOstatok/(kolUpacTest-i)*100000)%edVUpakovkeTest));
+						console.log((cenaOstatok/(kolUpacTest-i)).toFixed(7));
+						console.log((cenaOstatok/(kolUpacTest-i))*10000)
+						console.log(84.51/30);
+
+						if (((cenaOstatok/(kolUpacTest-i)).toFixed(6)*100000%edVUpakovkeTest)==0){
+							console.log(i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeTest);
+							console.log((kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2));
+							result[0] = i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeTest;
+							result[1] = (kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2);
+							return result;
+						}
+					}
+					console.log(i + " осталось " + cenaOstatok);
+
+				}
+
+			}
+			*/
+
+				//тестовая функция вычисление цены одной позиции о других позициях не знает
+
+			
+			
+			function CalculateOne(position){
+				
+				var pricePosition = parseFloat(position.pricePosition);
+				var kolichestvo = parseFloat(position.kolichestvo);
+				var edVUpakovke = parseFloat(position.edVUpakovke);
+				var priceZaEdNmck = parseFloat(position.priceZaEdNmck);
+				var summaNmck = parseFloat(position.summaNmck);
+				var snizhenie = parseFloat(snizhenie);
+				var kolUpac = parseFloat(kolichestvo/edVUpakovke);
+				var priceZaEd = parseFloat(position.priceZaEd);
+
+				//var priceZaEdTest = parseInt(priceZaEdTestNmck * (1-snizhenieTest/100)*100)/100;
+
+						//priceZaEdTest = 3.13;
+
+				var cenaOstatok = pricePosition;
+
+				var result = [];
+
+				console.log(position.name + ' start calculate' )
+				console.log(priceZaEd);
+				console.log(kolUpac);
+
+				if (pricePosition == 0){
+					if (kolichestvo !=0 ){
+						pricePosition = kolichestvo * priceZaEd;
+						var positionRes = new positionObj(position.name, kolichestvo, edVUpakovke, priceZaEdNmck, pricePosition);
+						lecarstvaResult.push(positionRes);
+					}
+
+				} else {
+
+					for(let i=0; i<=kolUpac; i++){
+						cenaOstatok = pricePosition - (i*edVUpakovke*priceZaEd);
+				
+						console.log("cenaOstatok = " + cenaOstatok);
+						console.log(kolUpac-i);
+						console.log(cenaOstatok*100);
+						console.log(cenaOstatok%(kolUpac-i));
+						console.log(((cenaOstatok*100)%(kolUpac-i)).toFixed(6));
+
+						let ostatoc = ((cenaOstatok*100).toFixed(6)%(kolUpac-i)).toFixed(6);
+						console.log("остаток перед первой проверкой " + ostatoc);
+						if (ostatoc == 0){
+							console.log("остаток равен 0");
+						}
+				
+						if (ostatoc == 0){
+							console.log(i + " упаковок по цене = " + priceZaEd*edVUpakovke);
+							console.log((kolUpac-i) + " упаковок по цене = " + (cenaOstatok/(kolUpac-i)).toFixed(2));
+					
+							console.log("Проверка на остаток цену за единицу " + parseFloat((cenaOstatok/(kolUpac-i)*1000000)%edVUpakovke));
+							console.log((cenaOstatok/(kolUpac-i)).toFixed(7));
+							console.log((cenaOstatok/(kolUpac-i))*10000);
+							console.log(((cenaOstatok/(kolUpac-i))*1000000%parseInt(edVUpakovke)));
+							console.log("test divided 12266000%20", 12266000.0000%20.000000);
+							//console.log(84.51/30);
+
+							//проверка на цену за единицу товара чтоб было не более 6 знаков после запятой
+							if (((cenaOstatok/(kolUpac-i)).toFixed(6)*1000000%parseInt(edVUpakovke))==0){
+							
+								//проверка чтоб первая позиция не содержала 0 х элементов и создание нового обекта с необходимыми данными
+								if (i != 0) {
+									var positionRes = new positionObj(position.name, i*edVUpakovke, edVUpakovke, priceZaEdNmck, "0");
+									positionRes.priceZaEd = parseFloat(priceZaEd.toFixed(6));
+									positionRes.priceZaUpakovky = priceZaEd*edVUpakovke;
+									positionRes.pricePosition = (positionRes.priceZaEd * positionRes.kolichestvo).toFixed(2);
+									lecarstvaResult.push(positionRes);
+								}
+
+								if (kolUpac-i != 0){
+									var positionRes = new positionObj(position.name, (kolUpac-i)*edVUpakovke, edVUpakovke, priceZaEdNmck, "0");
+									positionRes.priceZaUpakovky = (cenaOstatok/(kolUpac-i)).toFixed(2);
+									positionRes.priceZaEd = parseFloat((positionRes.priceZaUpakovky/edVUpakovke).toFixed(6));
+									positionRes.pricePosition = (positionRes.priceZaEd * positionRes.kolichestvo).toFixed(2);
+									lecarstvaResult.push(positionRes);
+								}
+
+
+								console.log(position.name + i + " упаковок по цене = " + priceZaEd*edVUpakovke);
+								console.log((position.name +kolUpac-i) + " упаковок по цене = " + (cenaOstatok/(kolUpac-i)).toFixed(2));
+								result[0] = i + " упаковок по цене = " + priceZaEd*edVUpakovke;
+								result[1] = (kolUpac-i) + " упаковок по цене = " + (cenaOstatok/(kolUpac-i)).toFixed(2);
+							
+								break;
+							}
+						}
+					console.log(i + " осталось " + cenaOstatok);
+
+					}
+				}
+			}
+
+			function summaBesNds(number, stavka){
+				stavka = parseInt(stavka);
+				var num = number*(1-(stavka/(100+stavka)));
+				return num.toFixed(2);
+			}
+
+			//Передается объект позиции для расчета
+			function Calculate(position){
+				
+				var priceContractTest = position.pricePosition;
+				var kolichestvoTest = position.kolichestvo;
+				var edVUpakovkeTest = position.edVUpakovke;
+				var priceZaEdTestNmck = position.priceZaEdNmck;
+				var summaNmckTest = position.summaNmck;
+				var snizhenieTest = position.snizhenie;
+
+				var kolUpacTest = kolichestvoTest/edVUpakovkeTest;
+
+				var priceZaEdTest = position.priceZaEd;
+				//var priceZaEdTest = parseInt(priceZaEdTestNmck * (1-snizhenieTest/100)*100)/100;
+
+						//priceZaEdTest = 3.13;
+
+				var cenaOstatok = priceContractTest;
+
+				var result = [];
+
+				console.log(position.name + 'start calculate' )
+				console.log(priceZaEdTest);
+				console.log(kolUpacTest);
+
+				for(let i=0; i<=kolUpacTest; i++){
+					cenaOstatok = priceContractTest - (i*edVUpakovkeTest*priceZaEdTest);
+				
+					console.log((cenaOstatok*100)%(kolUpacTest-i));
+				
+					if (((cenaOstatok.toFixed(6)*100)%((kolUpacTest-i)))==0){
+						console.log(i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeTest);
+						console.log((kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2));
+					
+						console.log("Проверка на остаток цену за единицу " + parseFloat((cenaOstatok/(kolUpacTest-i)*100000)%edVUpakovkeTest));
+						console.log((cenaOstatok/(kolUpacTest-i)).toFixed(7));
+						console.log((cenaOstatok/(kolUpacTest-i))*10000)
+						//console.log(84.51/30);
+
+						//проверка на цену за единицу товара чтоб было не более 6 знаков после запятой
+						if (((cenaOstatok/(kolUpacTest-i)).toFixed(6)*100000%edVUpakovkeTest)==0){
+							
+							//проверка чтоб первая позиция не содержала 0 х элементов и создание нового обекта с необходимыми данными
+							if (i != 0) {
+								var positionRes = new positionObj(position.name, position.edIzmer, i*edVUpakovkeTest, priceZaEdTestNmck, summaNmckTest, edVUpakovkeTest, snizhenieTest);
+								positionRes.priceZaEd = priceZaEdTest;
+								positionRes.priceZaUpakovky = priceZaEdTest*edVUpakovkeTest;
+								positionRes.pricePosition = (positionRes.priceZaEd * positionRes.kolichestvo).toFixed(6);
+								lecarstvaResult.push(positionRes);
+							}
+
+							if (kolUpacTest-i != 0){
+								var positionRes = new positionObj(position.name, position.edIzmer, (kolUpacTest-i)*edVUpakovkeTest, priceZaEdTestNmck, summaNmckTest, edVUpakovkeTest, snizhenieTest);
+								positionRes.priceZaUpakovky = (cenaOstatok/(kolUpacTest-i)).toFixed(2);
+								positionRes.priceZaEd = positionRes.priceZaUpakovky/edVUpakovkeTest;
+								positionRes.pricePosition = (positionRes.priceZaEd * positionRes.kolichestvo).toFixed(6);
+								lecarstvaResult.push(positionRes);
+							}
+
+
+							console.log(position.name + i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeTest);
+							console.log((position.name +kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2));
+							result[0] = i + " упаковок по цене = " + priceZaEdTest*edVUpakovkeTest;
+							result[1] = (kolUpacTest-i) + " упаковок по цене = " + (cenaOstatok/(kolUpacTest-i)).toFixed(2);
+							
+							break;
+						}
+					}
+					console.log(i + " осталось " + cenaOstatok);
+
+				}
+			}
+
+			//функция для отображения результата в виде таблицы спецификации
+
+			function showResultSpecTable(){
+				let lable = document.createElement("p");
+				lable.innerHTML = "Результат расчета для таблицы спецификации:";
+				document.getElementById('body').appendChild(lable);
+
+				//let ;
+
+				let big_Table = document.createElement("table");
+				let bigTable_body = document.createElement("tbody");
+				let bigTable_tr1 = document.createElement("tr");
+
+				let bigTable_data1_tr1 = document.createElement("td");
+				let bigTable_data2_tr1 = document.createElement("td");
+
+				bigTable_tr1.appendChild(bigTable_data1_tr1);
+				bigTable_tr1.appendChild(bigTable_data2_tr1);
+				bigTable_body.appendChild(bigTable_tr1);
+				big_Table.appendChild(bigTable_body);
+
+				let Name_table = document.createElement('table');
+				let Name_table_thead = document.createElement('thead');
+				let Name_table_tbody = document.createElement('tbody');
+
+				Name_table.appendChild(Name_table_thead);
+				Name_table.appendChild(Name_table_tbody);
+				
+				let Name_table_data1_th = document.createElement("td");
+				Name_table_data1_th.setAttribute('rowSpan', '2');
+				Name_table_data1_th.innerHTML = "N";
+				Name_table_thead.appendChild(Name_table_data1_th);
+
+				let Name_table_data2_th = document.createElement("td");
+				Name_table_data2_th.setAttribute('rowSpan', '2');
+				Name_table_data2_th.innerHTML = "Наименование";
+				Name_table_thead.appendChild(Name_table_data2_th);
+
+				bigTable_data1_tr1.appendChild(Name_table);
+				
+
+				let table_Result = document.createElement('table');
+				let thead_Result = document.createElement("thead");
+				let tbody_Result = document.createElement("tbody");
+
+				
+
+				//Название столбцов таблицы справа большой таблицы
+
+				let row_th1 = document.createElement("tr");
+				let data1_th1 = document.createElement("td");
+				data1_th1.innerHTML = "Цена за единицу товара";
+				data1_th1.setAttribute('colSpan','3');
+				row_th1.appendChild(data1_th1);
+
+				let data2_th1 = document.createElement("td");
+				data2_th1.innerHTML = "-";
+				row_th1.appendChild(data2_th1);
+
+				let data3_th1 = document.createElement("td");
+				data3_th1.innerHTML = "Стоимость в том числе";
+				data3_th1.setAttribute('colSpan','3');
+				row_th1.appendChild(data3_th1);
+
+				let data4_th1 = document.createElement("td");
+				data4_th1.innerHTML = "-";
+				row_th1.appendChild(data4_th1);
+
+				let data5_th1 = document.createElement("td");
+				data5_th1.innerHTML = "-";
+				row_th1.appendChild(data5_th1);
+
+				thead_Result.appendChild(row_th1);
+
+
+				let row_th = document.createElement("tr");
+
+				let data2_th = document.createElement("td");
+				data2_th.innerHTML = "без НДС";
+				row_th.appendChild(data2_th);
+
+				let data3_th = document.createElement("td");
+				data3_th.innerHTML = "НДС %";
+				row_th.appendChild(data3_th);
+
+				let data4_th = document.createElement("td");
+				data4_th.innerHTML = "Итого";
+				row_th.appendChild(data4_th);
+
+				let data5_th = document.createElement("td");
+				data5_th.innerHTML = "Кол ед.из.";
+				row_th.appendChild(data5_th);
+
+				let data6_th = document.createElement("td");
+				data6_th.innerHTML = "без НДС";
+				row_th.appendChild(data6_th);
+
+				let data7_th = document.createElement("td");
+				data7_th.innerHTML = "НДС %";
+				row_th.appendChild(data7_th);
+
+				let data8_th = document.createElement("td");
+				data8_th.innerHTML = "Итого";
+				row_th.appendChild(data8_th);
+
+				let data9_th = document.createElement("td");
+				data9_th.innerHTML = "Кол уп.";
+				row_th.appendChild(data9_th);
+
+				let data10_th = document.createElement("td");
+				data10_th.innerHTML = "Цена за уп.";
+				row_th.appendChild(data10_th);
+
+				thead_Result.appendChild(row_th);
+				table_Result.appendChild(thead_Result);
+				table_Result.appendChild(tbody_Result);
+
+				bigTable_data2_tr1.appendChild(table_Result);
+				document.getElementById('body').appendChild(big_Table);
+				
+
+				for (let i = 0; i < lecarstvaResult.length; i++){
+					
+					let Name_row = document.createElement("tr");
+
+					let data1 = document.createElement("td");
+					data1.innerHTML = i+1;
+					Name_row.appendChild(data1);
+
+					let data_name = document.createElement("td");
+					data_name.innerHTML = lecarstvaResult[i].name;
+					Name_row.appendChild(data_name);
+					Name_table_tbody.appendChild(Name_row);
+
+					let row = document.createElement("tr");
+					let data2 = document.createElement("td");
+					data2.innerHTML = summaBesNds(lecarstvaResult[i].priceZaEd, stavka_nds).replace('.', ',');
+					row.appendChild(data2);
+
+					let data3 = document.createElement("td");
+					data3.innerHTML = stavka_nds + "%";
+					row.appendChild(data3);
+
+					let data4 = document.createElement("td");
+					data4.innerHTML = String(lecarstvaResult[i].priceZaEd).replace('.', ',');
+					row.appendChild(data4);
+
+					let data5 = document.createElement("td");
+					data5.innerHTML = lecarstvaResult[i].kolichestvo;
+					row.appendChild(data5);
+
+					let data6 = document.createElement("td");
+					data6.innerHTML = summaBesNds(lecarstvaResult[i].pricePosition, stavka_nds).replace('.', ',');
+					row.appendChild(data6);
+
+					let data7 = document.createElement("td");
+					data7.innerHTML = stavka_nds + "%";
+					row.appendChild(data7);
+
+					let data8 = document.createElement("td");
+					data8.innerHTML = String(lecarstvaResult[i].pricePosition).replace('.', ',');
+					row.appendChild(data8);
+
+					let data9 = document.createElement("td");
+					data9.innerHTML = String(lecarstvaResult[i].kolichestvo/lecarstvaResult[i].edVUpakovke).replace('.', ',');
+					row.appendChild(data9);
+
+					let data10 = document.createElement("td");
+					data10.innerHTML = String(lecarstvaResult[i].priceZaUpakovky).replace('.', ',');
+					row.appendChild(data10);
+
+					tbody_Result.appendChild(row);
+
+					//this.name = name;
+					//this.edIzmer = edIzmer;
+					//this.kolichestvo = parseFloat(kolichestvo);
+					//this.edVUpakovke = parseFloat(edVUpakovke);
+					//this.priceZaEdNmck = parseFloat(priceZaEdNmck);
+					//this.summaNmck = parseFloat(summaNmck);
+					//this.pricePosition = pricePosition;
+					//this.priceZaEd = parseInt(priceZaEdNmck * (1-snizhenie/100)*100)/100;
+					//this.priceZaUpakovky = (this.edVUpakovke * this.priceZaEd).toFixed(6);
+
+				}
+
+				let tfoot_Result = document.createElement("tfoot");
+				let row_tf = document.createElement("tr");
+				tfoot_Result.appendChild(row_tf);
+				table_Result.appendChild(tfoot_Result);
+
+				let tbody_rows = tbody_Result.rows.length;
+				let summa = 0.0;
+
+				console.log(typeof summa);
+
+				for (let i = 0; i < tbody_rows; i++){
+					let cell = tbody_Result.rows.item(i).cells;
+					summa = summa + parseFloat(cell[6].innerHTML.replace(',', '.'));
+					console.log("прибавляем " + cell[6].innerHTML);
+					console.log('сумма = ' + summa);
+					console.log(typeof summa);
+				}
+				//console.log(summa);
+				let data1_tf = document.createElement("td");
+				data1_tf.innerHTML = "Итого";
+				data1_tf.setAttribute('colSpan','6');
+				row_tf.appendChild(data1_tf); 
+
+				let data2_tf = document.createElement("td");
+				if (summa == cena_Kontrakta){
+					data2_tf.style.backgroundColor = '#18ee18';
+				} else if (summa != cena_Kontrakta){
+					data2_tf.style.backgroundColor = 'red';
+				}
+				data2_tf.innerHTML = summa.toFixed(2).replace('.', ',');
+				row_tf.appendChild(data2_tf);
+
+			}
+			
+
+			function showResult(){
+				
+				let lable = document.createElement("p");
+				lable.innerHTML = "Результат расчета:";
+				document.getElementById('body').appendChild(lable);
+
+				let table_Result = document.createElement('table');
+				let thead_Result = document.createElement("thead");
+				let tbody_Result = document.createElement("tbody");
+
+				table_Result.appendChild(thead_Result);
+				table_Result.appendChild(tbody_Result);
+
+				document.getElementById('body').appendChild(table_Result);
+
+				for (let i = 0; i < lecarstvaResult.length; i++){
+					let row = document.createElement("tr");
+					let data1 = document.createElement("td");
+					data1.innerHTML = i+1;
+					row.appendChild(data1);
+
+					let data2 = document.createElement("td");
+					data2.innerHTML = lecarstvaResult[i].name;
+					row.appendChild(data2);
+
+					let data3 = document.createElement("td");
+					data3.innerHTML = lecarstvaResult[i].edIzmer;
+					row.appendChild(data3);
+
+					let data4 = document.createElement("td");
+					data4.innerHTML = lecarstvaResult[i].kolichestvo;
+					row.appendChild(data4);
+
+					let data5 = document.createElement("td");
+					data5.innerHTML = lecarstvaResult[i].edVUpakovke;
+					row.appendChild(data5);
+
+					let data6 = document.createElement("td");
+					data6.innerHTML = lecarstvaResult[i].priceZaEdNmck;
+					row.appendChild(data6);
+
+					let data7 = document.createElement("td");
+					data7.innerHTML = lecarstvaResult[i].summaNmck;
+					row.appendChild(data7);
+
+					let data8 = document.createElement("td");
+					data8.innerHTML = lecarstvaResult[i].pricePosition;
+					row.appendChild(data8);
+
+					let data9 = document.createElement("td");
+					data9.innerHTML = lecarstvaResult[i].priceZaEd;
+					row.appendChild(data9);
+
+					let data10 = document.createElement("td");
+					data10.innerHTML = lecarstvaResult[i].priceZaUpakovky;
+					row.appendChild(data10);
+
+					tbody_Result.appendChild(row);
+
+					//this.name = name;
+					//this.edIzmer = edIzmer;
+					//this.kolichestvo = parseFloat(kolichestvo);
+					//this.edVUpakovke = parseFloat(edVUpakovke);
+					//this.priceZaEdNmck = parseFloat(priceZaEdNmck);
+					//this.summaNmck = parseFloat(summaNmck);
+					//this.pricePosition = pricePosition;
+					//this.priceZaEd = parseInt(priceZaEdNmck * (1-snizhenie/100)*100)/100;
+					//this.priceZaUpakovky = (this.edVUpakovke * this.priceZaEd).toFixed(6);
+
+				}
+
+				let tfoot_Result = document.createElement("tfoot");
+				let row_tf = document.createElement("tr");
+				tfoot_Result.appendChild(row_tf);
+				table_Result.appendChild(tfoot_Result);
+
+				let tbody_rows = tbody_Result.rows.length;
+				let summa = 0;
+
+				for (let i = 0; i < tbody_rows; i++){
+					let cell = tbody_Result.rows.item(i).cells;
+					summa = summa + parseFloat(cell[7].innerHTML);
+					console.log("прибавляем " + cell[7].innerHTML);
+				}
+				//console.log(summa);
+				let data1_tf = document.createElement("td");
+				data1_tf.innerHTML = "Итого";
+				row_tf.appendChild(data1_tf); 
+
+				let data2_tf = document.createElement("td");
+				data2_tf.innerHTML = summa;
+				row_tf.appendChild(data2_tf);
+
+			} 
+			
+			
+		</script>
+		
+		<p>Тестовая страница для подсчета колличества лекарств</p>
+		<p>Цена контракта--------------НДС------------Снижение</p>
+
+		<div><input type="text" id='price' inputmode="decimal" style="text-align: left; width: 200px;" placeholder="">
+			<input type="text" id='nds' inputmode="decimal" value="10" style="text-align: left; width: 100px; font-weight: bold; " placeholder="">
+			<input type="text" id='snizhenie_input' inputmode="decimal" value = "0" style="text-align: left; width: 100px;" placeholder="">
+		</div>
+		<br>
+		<table>
+			<thead>
+				<tr>
+					<td>Наименование</td>
+					<td>Колличество</td>
+					<td>Ед. в упаковке</td>
+					<td>Цена за ед. НМЦК</td> 
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><textarea id="name" style="width:200px; height: 340px;"></textarea></td>
+					<td><textarea id="kolichestvo" style="width:200px; height: 340px;"></textarea></td>
+					<td><textarea id="edVUpakovke" style="width:200px; height: 340px;"></textarea></td>
+					<td><textarea id="priceZaEdNMCK" style="width:200px; height: 340px;"></textarea></td>
+				</tr>
+			</tbody>
+		</table>
+		<br>
+		<input type="button" id="getDatabutton" value="Взять данные">
+		<br>
+		<br>
+		<p>Введите исходные данные</p>
+		<input type="button" id='buttonCalculate' value='Вычислить'>
+
+		<dev>
+			<p>Table input Test</p>
+			<!--<input type="text" id="colRowsInputTable">-->
+			<input type="button" id="CreateRowsButton" value="Добавить 1 строку">
+			<input type="button" id="DeleteRowsButton" value="Удалить 1 строку снизу">
+			<br>
+			<br>
+
+			<table id="inputTable">
+				<tr>
+					<th>Наименование</th>
+					<th>Кол-во, ед.езмер</th>
+					<th>Ед. в упаковке</th>
+					<th>Цена НМЦК за ед. измер</th>
+				<!--
+					<th>Сумма НМЦК</th>
+					<th>Сниж-е %</th>
+					<th>Сумма со снижением</th>
+				-->
+				</tr>
+			</table>
+
+		</dev>
+
+	</body>
+</html>
