@@ -1,5 +1,5 @@
 import { useState } from 'react'
-//import './App.css'
+// import './App.css'
 import MainHeader from './components/mainHeader'
 import InputPrice from './components/InputPrice'
 import InputData from './components/InputData'
