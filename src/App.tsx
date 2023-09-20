@@ -1,20 +1,22 @@
-import { useState } from 'react'
 // import './App.css'
 import MainHeader from './components/mainHeader'
 import InputPrice from './components/InputPrice'
 import InputData from './components/InputData'
 import InputDataTable from './components/InputDataTable'
+import { setupStore } from '../src/state/state';
+import { Provider } from 'react-redux'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const store = setupStore();
 
   return (
-    <>
-     <MainHeader />
-     <InputPrice />
-     <InputData />
-     <InputDataTable />
-    </>
+    <Provider store={store}>
+
+      <MainHeader />
+      <InputPrice />
+      <InputData />
+      <InputDataTable />
+    </Provider>
   )
 }
 
