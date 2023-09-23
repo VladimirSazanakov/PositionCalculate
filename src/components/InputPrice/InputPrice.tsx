@@ -10,29 +10,63 @@ const InputPrice = () => {
   const nds = state.nds;
   const snizhenie = state.snizhenie;
 
+  const validNumber = (str:string):boolean =>{
+    return !isNaN(Number(str));
+  }
+
   const priceOnChange = (event: any) => {
     // console.log(event.target.value);
-    const value = event.target.value;
-    dispatch(setPrice(value));
+    let value = event.target.value;
+    value=value.replace(',','.');
+    value = value.replace(' ', '');
+    if (validNumber(value)){
+      dispatch(setPrice(value));
+    }
+    console.log(price);
+  }
+
+  const ndsOnChange = (event: any) =>{
+    let value = event.target.value;
+    value = value.replace(',','.');
+    value = value.replace(' ', '');
+    if(validNumber(value)){
+      dispatch(setNds(value));
+    }
+    console.log('NDS', value);
+  }
+
+  const snizhenieOnChange = (event: any) =>{
+    let value = event.target.value;
+    value = value.replace(',','.');
+    value = value.replace(' ', '');
+    if(validNumber(value)){
+      dispatch(setSnizhenie(value));
+    }
+    console.log('snizhenie', value);
   }
 
   return (
     <>
-      <p>Цена контракта--------------НДС------------Снижение</p>
+      <div className={style.InputPrice}>
+      <div className={style.elementContainer}>
+      <p className={style.label}> Цена контракта</p>
+      <input
+      type="text"
+      inputMode='decimal'
+      className={style.price}
+      placeholder="Цена контракта"
+      value={price}
+      onChange={priceOnChange} />
+      </div>
 
-      <div>
-        <label className={style.label} > Цена контракта
-
-          <input
-            type="text"
-            inputMode='decimal'
-            className={style.price}
-            placeholder="Цена контракта"
-            value={price}
-            onChange={priceOnChange} />
-        </label>
-        <input type="text" inputMode='decimal' className={style.nds} id='nds' value={nds} />
-        <input type="text" inputMode="decimal" className={style.snizhenie} id='snizhenie_input' value={snizhenie} />
+      <div className={style.elementContainer}>
+      <p className={style.label}>НДС, %</p>
+        <input type="text" inputMode='decimal' className={style.nds} id='nds' value={nds} onChange={ndsOnChange} />
+        </div>
+        <div className={style.elementContainer}>
+        <p className={style.label}>Снижение, %</p>
+        <input type="text" inputMode="decimal" className={style.snizhenie} id='snizhenie_input' value={snizhenie} onChange={snizhenieOnChange} />
+        </div>
       </div>
     </>
   )

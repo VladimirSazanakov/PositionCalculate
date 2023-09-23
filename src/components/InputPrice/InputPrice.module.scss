@@ -1,18 +1,52 @@
+.InputPrice{
+  display: flex;
+  width: min-content;
+  height: min-content;
+  padding: 15px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-bottom: 25px;
+  border-radius: 10px;
+  border: 2px solid black;
+}
+
+.elementContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+
+}
+input[type='text'] {
+  border-radius: 10px;
+}
+
 .price {
   text-align: left;
   width: 200px;
+  padding: 5px;
+  font-size: inherit;
 }
 
 .nds {
   text-align: left;
 width: 200px;
+padding: 5px;
+font-size: inherit;
 }
 
 .snizhenie {
   text-align: left;
-  width: 100px;
+  width: 120px;
+  padding: 5px;
+  font-size: inherit;
 }
 
 .label{
-  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
 }
