@@ -1,6 +1,6 @@
 import style from './InputPrice.module.scss';
 import { useAppDispatch, useAppSelector } from '../../hooks/reducer';
-import { setPrice, setNds, setSnizhenie } from '../../state/reducer/reducer';
+import { setPrice, setNds, setSnizhenie } from '../../state/reducer/price';
 
 const InputPrice = () => {
   const state = useAppSelector(state => state.price);

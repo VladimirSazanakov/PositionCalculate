@@ -1,13 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-interface priceState {
-  price: number;
+interface dataState {
+  price: number | null;
   nds: number;
-  snizhenie: number;
+  snizhenie: number | null;
 }
 
 const initialState: priceState = {
-  price: 0,
+  price: null,
   nds: 10,
   snizhenie: 0
 }

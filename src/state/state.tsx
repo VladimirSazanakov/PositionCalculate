@@ -1,5 +1,5 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { reducer as priceReducer } from './reducer/reducer'
+import { reducer as priceReducer } from './reducer/price'
 
 
 const rootReducer = combineReducers({
